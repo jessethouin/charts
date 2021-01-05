@@ -16,6 +16,7 @@ import java.util.Date;
 public class BinanceLimitOrder {
     @Id
     public long orderId;
+    public BigDecimal limitPrice;
     public BigDecimal averagePrice;
     public int type;
 }

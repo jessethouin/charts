@@ -31,28 +31,39 @@
     let timestamp = [];
     let bids = [];
     let asks = [];
+    let values = [];
 
     $(document).ready(function () {
         showGraph();
     });
 
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let length = urlParams.get('length');
+    length = (length === null || length === undefined) ? 500 : length;
 
     function showGraph() {
         {
-            $.get("/data",
+            $.get("/data?length=" + length,
                 function (data) {
-                    let tradesData = data.trades;
-                    let ordersData = data.orders;
+                    let tradesData = data.trades.reverse();
+                    let ordersData = data.orders.reverse();
+                    let valuesData = data.vals.reverse();
 
                     console.log(data);
 
                     for (const i in tradesData) {
-                        p.push(tradesData[i].p);
-                        ma1.push(tradesData[i].ma1);
-                        ma2.push(tradesData[i].ma2);
+                        p.push(tradesData[i].p === 0 ? null : tradesData[i].p);
+                        ma1.push(tradesData[i].ma1 === 0 ? null : tradesData[i].ma1);
+                        ma2.push(tradesData[i].ma2 === 0 ? null : tradesData[i].ma2);
                         timestamp.push(new Date(Date.parse(tradesData[i].timestamp)).toLocaleTimeString());
-                        bids.push(ordersData[i] !== null && ordersData[i].type === 0 ? ordersData[i].averagePrice : null);
-                        asks.push(ordersData[i] !== null && ordersData[i].type === 1 ? ordersData[i].averagePrice : null);
+                        bids.push(ordersData !== undefined && ordersData[i] !== undefined && ordersData[i] !== null && ordersData[i].type === 0 ? ordersData[i].limitPrice : null);
+                        asks.push(ordersData !== undefined && ordersData[i] !== undefined && ordersData[i] !== null && ordersData[i].type === 1 ? ordersData[i].limitPrice : null);
+                        if (valuesData[i] !== undefined) {
+                            values.push(valuesData[i].pval === null ? null : valuesData[i].pval);
+                        } else {
+                            values.push(null);
+                        }
                     }
 
                     const chartdata = {
@@ -60,53 +71,69 @@
                         datasets: [
                             {
                                 label: 'Price',
+                                yAxisID: 'first-y-axis',
                                 backgroundColor: '#49e2ff',
                                 borderColor: '#46d5f1',
                                 hoverBackgroundColor: '#CCCCCC',
                                 hoverBorderColor: '#666666',
                                 borderWidth: 1,
                                 pointRadius: 0,
-                                data: p.reverse()
+                                data: p
                             },
                             {
                                 label: 'MA1',
+                                yAxisID: 'first-y-axis',
                                 backgroundColor: '#5bff49',
                                 borderColor: '#3db430',
                                 hoverBackgroundColor: '#CCCCCC',
                                 hoverBorderColor: '#666666',
                                 borderWidth: 1,
                                 pointRadius: 0,
-                                data: ma1.reverse()
+                                data: ma1
                             },
                             {
                                 label: 'MA2',
+                                yAxisID: 'first-y-axis',
                                 backgroundColor: '#f11919',
                                 borderColor: '#a71212',
                                 hoverBackgroundColor: '#CCCCCC',
                                 hoverBorderColor: '#666666',
                                 borderWidth: 1,
                                 pointRadius: 0,
-                                data: ma2.reverse()
+                                data: ma2
                             },
                             {
                                 label: 'Bids',
+                                yAxisID: 'first-y-axis',
                                 backgroundColor: '#68b131',
                                 borderColor: '#000000',
                                 hoverBackgroundColor: '#CCCCCC',
                                 hoverBorderColor: '#666666',
                                 borderWidth: 1,
                                 pointRadius: 5,
-                                data: bids.reverse()
+                                data: bids
                             },
                             {
                                 label: 'Asks',
+                                yAxisID: 'first-y-axis',
                                 backgroundColor: '#d91616',
                                 borderColor: '#000000',
                                 hoverBackgroundColor: '#CCCCCC',
                                 hoverBorderColor: '#666666',
                                 borderWidth: 1,
                                 pointRadius: 5,
-                                data: asks.reverse()
+                                data: asks
+                            },
+                            {
+                                label: 'Portfolio Value',
+                                yAxisID: 'second-y-axis',
+                                backgroundColor: '#5370cb',
+                                borderColor: '#5370cb',
+                                hoverBackgroundColor: '#CCCCCC',
+                                hoverBorderColor: '#666666',
+                                borderWidth: 3,
+                                pointRadius: 0,
+                                data: values
                             }
                         ]
                     };
@@ -117,9 +144,28 @@
                         type: 'line',
                         data: chartdata,
                         options: {
-                            animation: {
-                                duration: 0
-                            }
+                            /*scales: {
+                                yAxes: [{
+                                    display: true,
+                                    id: 'A',
+                                    type: 'linear',
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'BTC/USDT',
+                                        beginAtZero: false,
+                                    }
+                                }, {
+                                    display: false,
+                                    id: 'B',
+                                    type: 'linear',
+                                    position: 'right',
+                                    scaleLabel: {
+                                        display: true,
+                                        labelString: 'Portfolio Value USDT',
+                                        beginAtZero: false,
+                                    }
+                                }]
+                            }*/
                         }
                     });
                 });
@@ -131,28 +177,37 @@
         ma1 = [];
         ma2 = [];
         timestamp = [];
-        orders = [];
+        bids = [];
+        asks = [];
+        values = [];
 
         try {
-            $.get("/data", function (data) {
-                let tradesData = data.trades;
-                let ordersData = data.orders;
+            $.get("/data?length=" + length, function (data) {
+                let tradesData = data.trades.reverse();
+                let ordersData = data.orders.reverse();
+                let valuesData = data.vals.reverse();
 
                 for (const i in tradesData) {
-                    p.push(tradesData[i].p);
-                    ma1.push(tradesData[i].ma1);
-                    ma2.push(tradesData[i].ma2);
-                    bids.push(ordersData[i] !== null && ordersData[i].type === 0 ? ordersData[i].averagePrice : null);
-                    asks.push(ordersData[i] !== null && ordersData[i].type === 1 ? ordersData[i].averagePrice : null);
+                    p.push(tradesData[i].p === 0 ? null : tradesData[i].p);
+                    ma1.push(tradesData[i].ma1 === 0 ? null : tradesData[i].ma1);
+                    ma2.push(tradesData[i].ma2 === 0 ? null : tradesData[i].ma2);
+                    bids.push(ordersData !== undefined && ordersData[i] !== undefined && ordersData[i] !== null && ordersData[i].type === 0 ? ordersData[i].limitPrice : null);
+                    asks.push(ordersData !== undefined && ordersData[i] !== undefined && ordersData[i] !== null && ordersData[i].type === 1 ? ordersData[i].limitPrice : null);
                     timestamp.push(new Date(Date.parse(tradesData[i].timestamp)).toLocaleTimeString());
+                    if (valuesData[i] !== undefined) {
+                        values.push(valuesData[i].pval === null ? null : valuesData[i].pval);
+                    } else {
+                        values.push(null);
+                    }
                 }
 
-                lineGraph.data.datasets[0].data = p.reverse();
-                lineGraph.data.datasets[1].data = ma1.reverse();
-                lineGraph.data.datasets[2].data = ma2.reverse();
-                lineGraph.data.datasets[3].data = bids.reverse();
-                lineGraph.data.datasets[4].data = asks.reverse();
-                lineGraph.data.labels = timestamp.reverse();
+                lineGraph.data.datasets[0].data = p;
+                lineGraph.data.datasets[1].data = ma1;
+                lineGraph.data.datasets[2].data = ma2;
+                lineGraph.data.datasets[3].data = bids;
+                lineGraph.data.datasets[4].data = asks;
+                lineGraph.data.datasets[5].data = values;
+                lineGraph.data.labels = timestamp;
 
                 lineGraph.update();
             })

@@ -2,6 +2,7 @@ package com.jessethouin.charts.web;
 
 import com.jessethouin.charts.db.BinanceLimitOrderRepository;
 import com.jessethouin.charts.db.BinanceTradeHistoryRepository;
+import com.jessethouin.charts.db.OrderHistoryLookupRepository;
 import com.jessethouin.charts.db.beans.BinanceLimitOrder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,18 +17,26 @@ import java.util.Map;
 public class ChartController {
     private final BinanceTradeHistoryRepository binanceTradeHistoryRepository;
     private final BinanceLimitOrderRepository binanceLimitOrderRepository;
+    private final OrderHistoryLookupRepository orderHistoryLookupRepository;
 
-    public ChartController(BinanceTradeHistoryRepository binanceTradeHistoryRepository, BinanceLimitOrderRepository binanceLimitOrderRepository) {
+    public ChartController(BinanceTradeHistoryRepository binanceTradeHistoryRepository, BinanceLimitOrderRepository binanceLimitOrderRepository, OrderHistoryLookupRepository orderHistoryLookupRepository) {
         this.binanceTradeHistoryRepository = binanceTradeHistoryRepository;
         this.binanceLimitOrderRepository = binanceLimitOrderRepository;
+        this.orderHistoryLookupRepository = orderHistoryLookupRepository;
     }
 
     @GetMapping(path = "/data", produces = "application/json")
-    public @ResponseBody Map<String, Iterable<?>> chart() {
+    public @ResponseBody Map<String, Iterable<?>> chart(@RequestParam(name="length", required=false, defaultValue="500") int length) {
         Map<String, Iterable<?>> returnValue = new HashMap<>();
-        returnValue.put("trades", binanceTradeHistoryRepository.getTopOrderByTradeId(1, 300));
-        returnValue.put("orders", binanceLimitOrderRepository.getTopJoinBinanceTradeHistoryOrderByTradeId(1, 300));
+        returnValue.put("trades", binanceTradeHistoryRepository.getTopOrderByTradeId(1, length));
+        returnValue.put("orders", binanceLimitOrderRepository.getTopJoinBinanceTradeHistoryOrderByTradeId(1, length));
+        returnValue.put("vals", orderHistoryLookupRepository.getValues(1, length));
         return returnValue;
+    }
+
+    @GetMapping(path="/balance", produces = "application/json")
+    public @ResponseBody Double balance() {
+        return (double) 0;
     }
 
     @GetMapping(path = "/order", produces = "application/json")
