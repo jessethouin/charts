@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @Data
 public class CurrencyPosition {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private long positionId;
     @Convert(converter = BigDecimalConverter.class)
     private BigDecimal quantity;

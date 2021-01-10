@@ -15,7 +15,6 @@ import java.util.Date;
 @Setter(AccessLevel.PUBLIC)
 public class BinanceTradeHistory {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long tradeId;
     private Date timestamp;
     @Convert(converter = BigDecimalConverter.class)

@@ -11,7 +11,6 @@ import java.util.Set;
 @Data
 public class Currency {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private long currencyId;
     private String symbol;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseCurrency", fetch = FetchType.EAGER, orphanRemoval = true)
