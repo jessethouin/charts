@@ -1,10 +1,10 @@
 package com.jessethouin.charts.db.beans;
 
+import com.jessethouin.charts.db.BigDecimalConverter;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "CURRENCY")
@@ -13,6 +13,6 @@ public class Currency {
     @Id
     private long currencyId;
     private String symbol;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "baseCurrency", fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<CurrencyPosition> currencyPositions = new HashSet<>();
+    @Convert(converter = BigDecimalConverter.class)
+    private BigDecimal quantity;
 }
