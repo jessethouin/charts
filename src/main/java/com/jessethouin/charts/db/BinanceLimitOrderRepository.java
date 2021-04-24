@@ -13,7 +13,7 @@ public interface BinanceLimitOrderRepository extends CrudRepository<BinanceLimit
     @Query(value = """
             SELECT BLO.orderId, BLO.limitPrice, BLO.averagePrice, BLO.type
             FROM ORDER_HISTORY_LOOKUP OHL
-            LEFT JOIN BINANCE_LIMIT_ORDER BLO on OHL.orderId = BLO.orderId
+            LEFT JOIN BINANCE_LIMIT_ORDER BLO on OHL.orderId = BLO.id
             LEFT JOIN BINANCE_TRADE_HISTORY BTH on OHL.tradeId = BTH.tradeId
             ORDER BY BTH.timestamp DESC LIMIT :start, :end
             """, nativeQuery = true)
